@@ -36,9 +36,11 @@ typedef struct cpuboard {
 	/*
 	 *   [ add here the other CPU resources if necessary ]
 	 */
+    Uword   mar;
+    Uword   ir;
+
 	Uword	mem[MEMORY_SIZE];	/* 0XX:Program, 1XX:Data */
 } Cpub;
-
 
 /*=============================================================================
  *   Top Function of an Instruction Simulation
