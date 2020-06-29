@@ -1,6 +1,0 @@
-a1 a2
-.data 8c
-c1 c2 c3 c4 c5
-.text 50
-20 4d
-0f
