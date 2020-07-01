@@ -34,7 +34,7 @@ enum instruction_code {
     JR  = 0x0b
 };
 
-/* オペランドB */
+/* アドレッシングモード */
 enum operand_b {
     ACC = 0x00,
     IX  = 0x01,
@@ -45,7 +45,7 @@ enum operand_b {
     IX_MOD_ADDR_DATA = 0x07
 };
 
-/* Shift Mode */
+/* Shift&Rotate Mode */
 enum shift_mode {
     RA = 0x00,
     LA = 0x01,
@@ -91,15 +91,15 @@ int
 step(Cpub *cpub)
 {
     int return_status = RUN_STEP;
-    // 命令フェッチとPC更新
+    /* 命令フェッチとPC更新 */
     cpub->mar = cpub->pc;
     cpub->pc++;
-    cpub->ir = cpub->mem[(Addr)cpub->mar];
+    cpub->ir = cpub->mem[cpub->mar];
 
-    // 命令解読
+    /* 命令解読 */
     Uword decrypted_code = decrypt_instruction(cpub);
 
-    // 命令実行
+    /* 命令実行 */
     switch (decrypted_code) {
         case NOP:
             return_status = RUN_STEP;
@@ -391,7 +391,7 @@ int store(Cpub *cpub) {
     cpub->mar = cpub->pc;
     cpub->pc++;
     Uword second_word = cpub->mem[cpub->mar];
-    int return_status;
+    int return_status = RUN_STEP;
 
     switch (decrypted_opB) {
         case ACC:   /* ACC */
@@ -408,19 +408,15 @@ int store(Cpub *cpub) {
             break;
         case ABS_ADDR_TEXT:  /* 絶対アドレス(プログラム領域) */
             cpub->mem[second_word] = fetched_opA;
-            return_status = RUN_STEP;
             break;
         case ABS_ADDR_DATA:  /* 絶対アドレス(データ領域) */
             cpub->mem[0x100 + second_word] = fetched_opA;
-            return_status = RUN_STEP;
             break;
         case IX_MOD_ADDR_TEXT:  /* IX修飾アドレス(プログラム領域) */
             cpub->mem[second_word + cpub->ix] = fetched_opA;
-            return_status = RUN_STEP;
             break;
         case IX_MOD_ADDR_DATA:  /* IX修飾アドレス(データ領域) */
             cpub->mem[0x100 + second_word + cpub->ix] = fetched_opA;
-            return_status = RUN_STEP;
             break;
         default:
             return_status = RUN_HALT;
@@ -471,7 +467,7 @@ void sub(Cpub *cpub) {
     Uword fetched_opB = fetch_operandB(cpub);
     Uword sub = fetched_opA + (~fetched_opB + 0x01);
 
-    cpub->cf = carry_flag(fetched_opA, fetched_opB);
+    cpub->cf = carry_flag(fetched_opA, ((~fetched_opB) + 0x01));
     cpub->vf = overflow_flag(fetched_opA, fetched_opB);
     cpub->nf = negative_flag(sub);
     cpub->zf = zero_flag(sub);
@@ -489,7 +485,7 @@ void sbc(Cpub *cpub) {
     Uword fetched_opB = fetch_operandB(cpub);
     Uword sbc = fetched_opA + (~fetched_opB + 0x01) + (~cpub->cf + 0x01);
 
-    cpub->cf = carry_flag(fetched_opA, fetched_opB);
+    cpub->cf = carry_flag(fetched_opA, ((~fetched_opB + 0x01) + (~cpub->cf + 0x01)));
     cpub->vf = overflow_flag(fetched_opA, fetched_opB);
     cpub->nf = negative_flag(sbc);
     cpub->zf = zero_flag(sbc);
@@ -507,7 +503,7 @@ void compare(Cpub *cpub) {
     Uword fetched_opB = fetch_operandB(cpub);
     Uword result = fetched_opA + (~fetched_opB + 1);
 
-    cpub->vf = overflow_flag(fetched_opA, fetched_opB);
+    cpub->vf = overflow_flag(fetched_opA, (~fetched_opB + 1));
     cpub->nf = negative_flag(result);
     cpub->zf = zero_flag(result);
 }
