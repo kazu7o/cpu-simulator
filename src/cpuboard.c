@@ -45,7 +45,7 @@ enum operand_b {
     IX_MOD_ADDR_DATA = 0x07
 };
 
-/* Shift&Rotate Mode */
+/* Shift Mode */
 enum shift_mode {
     RA = 0x00,
     LA = 0x01,
@@ -618,7 +618,7 @@ void rotate(Cpub *cpub) {
             break;
         case LA:  /* RLA */
             rotated = fetched_opA << 1;
-            rotated = rotated | (cpub->cf >> 7); 
+            rotated = rotated | cpub->cf; 
             cpub->cf = msb;
             cpub->vf = (fetched_opA ^ rotated) & 0x80; //符号bitが変わったら
             break;

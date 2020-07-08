@@ -183,7 +183,7 @@ main()
 void
 cont(Cpub *cpub, char *straddr)
 {
-#define	MAX_EXEC_COUNT	500
+#define	MAX_EXEC_COUNT	100000
 	int	addr;
 	Addr	breakp;
 	int	count;
